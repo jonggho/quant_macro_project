@@ -67,7 +67,7 @@ xlabel('')
 grid on
 
 %[trend, cycle] = hpfilter(log(y), 1600);
-[trend, cycle] = qmacro_hpfilter(log(y), 1600);
+[cycle, trend] = qmacro_hpfilter(log(y), 1600);
 
 % compute sd(y) (from detrended series)
 ysd = std(cycle)*100;
