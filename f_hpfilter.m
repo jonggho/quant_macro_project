@@ -4,18 +4,14 @@ clear all
 close all
 
 % load the data
-startdate = '01/01/1954';
-enddate = '01/01/2019';
-% f = fred
-% Y = fetch(f,'GDPC1',startdate,enddate)
-% C = fetch(f,'PCECC96',startdate,enddate)
-% y = log(Y.Data(:,2));
-% c = log(C.Data(:,2));
-% q = Y.Data(:,1);
-
-load y.mat
-load c.mat
-load q.mat
+startdate = '01/01/1994';
+enddate = '01/01/2022';
+f = fred
+KR = fetch(f,'NGDPRSAXDCKRQ',startdate,enddate)
+JP = fetch(f,'JPNRGDPEXP',startdate,enddate)
+y = log(KR.Data(:,2));
+c = log(JP.Data(:,2));
+q = KR.Data(:,1);
 
 T = size(y,1);
 
@@ -36,28 +32,30 @@ for i=3:T-2
     A(i,i+1) = -4*lam; A(i,i+2) = lam;
 end
 
-tauGDP = A\y;
-tauPCE = A\c;
+tauKRGDP = A\y;
+tauJPGDP = A\c;
 
 % detrended GDP
-ytilde = y-tauGDP;
-ctilde = c-tauPCE;
+krtilde = y-tauKRGDP;
+jptilde = c-tauJPGDP;
 
 % plot detrended GDP
-dates = 1954:1/4:2019.1/4; zerovec = zeros(size(y));
+dates = 1994:1/4:2022.1/4; 
+% zerovec = zeros(size(y));
 figure
-title('Detrended log(real GDP) 1954Q1-2019Q1'); hold on
-plot(q, ytilde,'b', q, zerovec,'r')
+title('Detrended log(real GDP) 1994Q1-2022Q1'); hold on
+plot(q, krtilde,'b', q, jptilde,'r')
 datetick('x', 'yyyy-qq')
+legend('Korea','Japan','Location','northeast')
 
 % compute sd(y), sd(c), rho(y), rho(c), corr(y,c) (from detrended series)
-ysd = std(ytilde)*100;
-yrho = corrcoef(ytilde(2:T),ytilde(1:T-1)); yrho = yrho(1,2);
-corryc = corrcoef(ytilde(1:T),ctilde(1:T)); corryc = corryc(1,2);
+krsd = std(krtilde)*100;
+jpsd = std(jptilde)*100;
+corryc = corrcoef(krtilde(1:T),jptilde(1:T)); corryc = corryc(1,2);
 
-disp(['Percent standard deviation of detrended log real GDP: ', num2str(ysd),'.']); disp(' ')
-disp(['Serial correlation of detrended log real GDP: ', num2str(yrho),'.']); disp(' ')
-disp(['Contemporaneous correlation between detrended log real GDP and PCE: ', num2str(corryc),'.']);
+disp(['Percent standard deviation of detrended log real GDP for Korea: ', num2str(krsd),'.']); disp(' ')
+disp(['Percent standard deviation of detrended log real GDP for Japan: ', num2str(jpsd),'.']); disp(' ')
+disp(['Contemporaneous correlation between detrended log real GDP for Korea and log real GDP for Japan: ', num2str(corryc),'.']);
 
 
 
